@@ -1,44 +1,56 @@
-import { useLayoutEffect, useEffect, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
-// Phân biệt useEffect và useLayoutEffect:
-// - useEffect: Chạy sau khi DOM đã được cập nhật, không chặn việc vẽ giao diện.
-// - useLayoutEffect: Chạy ngay sau khi DOM đã được cập nhật, nhưng trước khi trình duyệt vẽ giao diện, có thể chặn việc vẽ giao diện nếu cần.
-
-// Thứ tự các bước khi gọi useEffect:
-// 1. Cập nhật lại state hoặc props.
-// 2. Cập nhật lại DOM (mutated) (nếu có).
-// 3. Render lại UI.
-// 4. Chạy cleanup function (nếu có) nếu deps thay đổi.
-// 5. Chạy callback function của useEffect sau khi DOM đã được cập nhật.
-
-// Thứ tự các bước khi gọi useLayoutEffect:
-// 1. Cập nhật lại state hoặc props.
-// 2. Cập nhật lại DOM (mutated) (nếu có).
-// 3. Chạy cleanup function (nếu có) nếu deps thay đổi.
-// 4. Gọi useLayoutEffect callback function ngay sau khi DOM đã được cập nhật, nhưng trước khi trình duyệt vẽ giao diện.
-// 5. Render lại UI.
+// useRef lưu các giá trị qua 1 tham chiếu bên ngoài vòng lặp render
 
 function Content() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(118);
 
-  // dùng useEffect thì xuất hiện 4 trong khoảng khắc rồi mới về 0
-  // useEffect(() => {
-  //   if (count > 3) setCount(0);
-  // }, [count]);
+  // Khi để biến timerRef.current bên trong hàm Content, mỗi lần render lại sẽ gọi lại hàm này và tạo ra một biến mới,
+  // dẫn đến việc không thể dừng timer đúng cách.
+  // Khi log giá trị của timerRef.current, nó sẽ là undefined nếu để bên trong hàm Content.
+  // Nếu để bên ngoài hàm Content, nó sẽ giữ giá trị qua các lần render
+  // và có thể dừng timer đúng cách.
+  // Vì vậy, ta để biến timerRef.current bên ngoài hàm Content.
 
-  // dùng useLayoutEffect thì không xuất hiện 4 trong khoảng khắc rồi mới về 0
-  useLayoutEffect(() => {
-    if (count > 3) setCount(0);
+  // với useRef, giá trị của nó khi khai báo là kiểu Object,
+  // và giá trị của nó sẽ không thay đổi ngoài kiểm soát qua các lần render.
+  // ref.current là giá trị thực tế mà ta muốn lưu trữ.
+
+  const timerRef = useRef();
+  const prevCount = useRef();
+  const h1Ref = useRef();
+
+  useEffect(() => {
+    prevCount.current = count;
   }, [count]);
 
-  const handleClick = () => {
-    setCount(count + 1);
+  useEffect(() => {
+    // Khi component unmount, dừng timer nếu nó đang chạy
+    console.log(h1Ref.current);
+  });
+
+  const handleStart = () => {
+    // Sử dụng useRef để lưu trữ giá trị của setInterval
+    timerRef.current = setInterval(() => {
+      setCount((prevCount) => prevCount - 1);
+    }, 1000);
+    console.log("Timer started", timerRef.current);
   };
+
+  const handleStop = () => {
+    // Sử dụng useRef để lưu trữ giá trị của setInterval và dừng nó
+    clearInterval(timerRef.current);
+    console.log("Timer stopped", timerRef.current);
+  };
+
+  console.log(count, prevCount.current);
 
   return (
     <div>
-      <h1>{count}</h1>
-      <button onClick={handleClick}>Increase</button>
+      {/* Cách gán ref kiểu này sẽ giống với getElementById */}
+      <h1 ref={h1Ref}>Count: {count}</h1>
+      <button onClick={handleStart}>Start</button>
+      <button onClick={handleStop}>Stop</button>
     </div>
   );
 }
