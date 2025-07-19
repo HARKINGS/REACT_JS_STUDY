@@ -1,43 +1,44 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useEffect, useState } from "react";
 
-const lessons = [
-  { id: 1, title: "Lesson 1", content: "Content for lesson 1" },
-  { id: 2, title: "Lesson 2", content: "Content for lesson 2" },
-  { id: 3, title: "Lesson 3", content: "Content for lesson 3" },
-];
+// Phân biệt useEffect và useLayoutEffect:
+// - useEffect: Chạy sau khi DOM đã được cập nhật, không chặn việc vẽ giao diện.
+// - useLayoutEffect: Chạy ngay sau khi DOM đã được cập nhật, nhưng trước khi trình duyệt vẽ giao diện, có thể chặn việc vẽ giao diện nếu cần.
+
+// Thứ tự các bước khi gọi useEffect:
+// 1. Cập nhật lại state hoặc props.
+// 2. Cập nhật lại DOM (mutated) (nếu có).
+// 3. Render lại UI.
+// 4. Chạy cleanup function (nếu có) nếu deps thay đổi.
+// 5. Chạy callback function của useEffect sau khi DOM đã được cập nhật.
+
+// Thứ tự các bước khi gọi useLayoutEffect:
+// 1. Cập nhật lại state hoặc props.
+// 2. Cập nhật lại DOM (mutated) (nếu có).
+// 3. Chạy cleanup function (nếu có) nếu deps thay đổi.
+// 4. Gọi useLayoutEffect callback function ngay sau khi DOM đã được cập nhật, nhưng trước khi trình duyệt vẽ giao diện.
+// 5. Render lại UI.
 
 function Content() {
-  const [lessonId, setLessonId] = useState(1);
+  const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    const handleComment = ({ detail }) => {
-      console.log(detail);
-    };
-    window.addEventListener(`lessonComment-${lessonId}`, handleComment);
+  // dùng useEffect thì xuất hiện 4 trong khoảng khắc rồi mới về 0
+  // useEffect(() => {
+  //   if (count > 3) setCount(0);
+  // }, [count]);
 
-    return () => {
-      window.removeEventListener(`lessonComment-${lessonId}`, handleComment);
-    };
-  }, [lessonId]);
+  // dùng useLayoutEffect thì không xuất hiện 4 trong khoảng khắc rồi mới về 0
+  useLayoutEffect(() => {
+    if (count > 3) setCount(0);
+  }, [count]);
+
+  const handleClick = () => {
+    setCount(count + 1);
+  };
 
   return (
     <div>
-      <ul>
-        {lessons.map((lesson) => {
-          return (
-            <li
-              key={lesson.id}
-              style={{
-                cursor: "pointer",
-                color: lessonId === lesson.id ? "blue" : "black",
-              }}
-              onClick={() => setLessonId(lesson.id)}
-            >
-              {lesson.title}
-            </li>
-          );
-        })}
-      </ul>
+      <h1>{count}</h1>
+      <button onClick={handleClick}>Increase</button>
     </div>
   );
 }

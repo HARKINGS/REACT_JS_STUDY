@@ -5,19 +5,19 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
 // Fake comment
-function emitComment(id) {
-  setInterval(() => {
-    window.dispatchEvent(
-      new CustomEvent(`lessonComment-${id}`, {
-        detail: `Nội dung comment cho bài học ${id}`,
-      })
-    );
-  }, 2000);
-}
+// function emitComment(id) {
+//   setInterval(() => {
+//     window.dispatchEvent(
+//       new CustomEvent(`lessonComment-${id}`, {
+//         detail: `Nội dung comment cho bài học ${id}`,
+//       })
+//     );
+//   }, 2000);
+// }
 
-emitComment(1);
-emitComment(2);
-emitComment(3);
+// emitComment(1);
+// emitComment(2);
+// emitComment(3);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
