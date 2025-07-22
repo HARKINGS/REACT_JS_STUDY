@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Content from "./Content";
 
 // 1. memo() => Higher Order Component (HOC) that prevents unnecessary re-renders
@@ -7,28 +7,22 @@ import Content from "./Content";
 // Ví dụ: nếu component cha re-render, nhưng component con không thay đổi props (dạng text cố định), thì component con sẽ không re-render.
 
 // 2. useCallback() => Returns a memoized callback function
+// useCallback giúp ghi nhớ các hàm bằng cách tạo một tham chiếu bên ngoài để lưu hàm, tránh việc tạo mới hàm mỗi lần re-render
+// Ví dụ: nếu bạn truyền một hàm vào component con, và hàm đó không thay đổi, thì component con sẽ không re-render lại khi component cha re-render.
+
 // 3. useMemo() => Returns a memoized value
 
 function App() {
   const [count, setCount] = useState(0);
-  const [count2, setCount2] = useState(0);
 
-  const increase = () => {
+  const handleIncrease = useCallback(() => {
     setCount((prevCount) => prevCount + 1);
-  };
-
-  const increase2 = () => {
-    setCount2((prevCount) => prevCount + 1);
-  };
+  }, []);
 
   return (
     <div style={{ padding: "10px 32px" }}>
-      <Content count={count} count2={count2} />
-      <h1>
-        {count} : {count2}
-      </h1>
-      <button onClick={increase}>Increase 1</button>
-      <button onClick={increase2}>Increase 2</button>
+      <Content onIncrease={handleIncrease} />
+      <h1>Count: {count}</h1>
     </div>
   );
 }

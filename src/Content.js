@@ -1,11 +1,11 @@
 import { memo } from "react";
 
-function Content({ count, count2 }) {
+function Content({ onIncrease }) {
   console.log("Changed");
   return (
     <div>
-      <h2>Hello World! {count}</h2>
-      <h3>Hello Star!</h3>
+      <button onClick={onIncrease}>Click me</button>
+      <h2>Hello World!</h2>
     </div>
   );
 }
