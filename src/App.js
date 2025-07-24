@@ -1,56 +1,110 @@
 import "./App.css";
-import { useState, useMemo } from "react";
-// import Content from "./Content";
+import { useReducer, useRef } from "react";
 
-// 1. memo() => Higher Order Component (HOC) that prevents unnecessary re-renders
-// memo giúp ghi nhớ các component con, tránh việc re-render không cần thiết
-// Ví dụ: nếu component cha re-render, nhưng component con không thay đổi props (dạng text cố định), thì component con sẽ không re-render.
+// useReducer có tác dụng tương tự useState, nhưng có thể quản lý trạng thái phức tạp hơn.
+// useReducer nhận vào một hàm reducer và một giá trị khởi tạo.
+// Hàm reducer nhận vào hai tham số: state hiện tại và action, và trả về trạng thái mới.
+// Thường dùng khi cần quản lý nhiều trạng thái hoặc khi trạng thái phụ thuộc vào các trạng thái khác.
+// Ví dụ: quản lý một bộ đếm đơn giản với useReducer.
 
-// 2. useCallback() => Returns a memoized callback function
-// useCallback giúp ghi nhớ các hàm bằng cách tạo một tham chiếu bên ngoài để lưu hàm, tránh việc tạo mới hàm mỗi lần re-render
-// Ví dụ: nếu bạn truyền một hàm vào component con, và hàm đó không thay đổi, thì component con sẽ không re-render lại khi component cha re-render.
+// Với useState
+// 1. Init state: 0
+// 2. Action: Increment, Decrement, Reset
 
-// 3. useMemo() => Returns a memoized value
-// useMemo giúp ghi nhớ giá trị tính toán, tránh việc tính toán lại mỗi lần re-render
+// Với useReducer
+// 1. Init state: { count: 0 }
+// 2. Action: { type: "increment" }, { type: "decrement" }, { type: "reset" }
+// 3. Reducer: (state, action) => { switch (action.type) { case "increment": return { count: state.count + 1 }; case "decrement": return { count: state.count - 1 }; case "reset": return { count: 0 }; default: throw new Error(); } }
+// 4. Dispatch: dispatch({ type: "increment" }), dispatch({ type: "decrement" }), dispatch({ type: "reset" })
+
+// 1. initial state
+const initialState = {
+  job: "",
+  jobs: [],
+};
+
+// 2. Actions
+const SET_JOB = "set_job";
+const ADD_JOB = "add_job";
+const DELETE_JOB = "delete_job";
+
+// Có thể hiểu là tạo hàm để có thể dispatch 1 object action
+const setJob = (payload) => {
+  return { type: SET_JOB, payload };
+};
+
+const addJob = (payload) => {
+  return { type: ADD_JOB, payload };
+};
+
+const deleteJob = (payload) => {
+  return { type: DELETE_JOB, payload };
+};
+
+// 3. Reducer function
+function reducer(state, action) {
+  console.log("Prev state:", state);
+  console.log("Prev action:", action);
+
+  let newState = { ...state };
+
+  switch (action.type) {
+    case SET_JOB:
+      newState = {
+        ...state,
+        job: action.payload,
+      };
+      break;
+    case ADD_JOB:
+      newState = {
+        ...state,
+        jobs: [...state.jobs, action.payload],
+      };
+      break;
+    case DELETE_JOB:
+      const newJobs = [...state.jobs];
+      newJobs.splice(action.payload, 1); // Remove the job at the specified index
+
+      newState = {
+        ...state,
+        jobs: newJobs,
+      };
+      break;
+    default:
+      throw new Error(`Unknown action type: ${action.type}`);
+  }
+
+  return newState;
+}
 
 function App() {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [products, setProducts] = useState([]);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { job, jobs } = state;
 
-  const handleSubmit = () => {
-    setProducts((prev) => [...prev, { name, price: +price }]);
+  const handleAddJob = () => {
+    dispatch(addJob(job));
+    dispatch(setJob("")); // Clear the input after adding the job
+    inputRef.current.focus(); // Focus back on the input field
   };
 
-  const totalPrice = useMemo(() => {
-    const result = products.reduce((total, product) => {
-      console.log("calculate total price");
-      return total + product.price;
-    }, 0);
-    return result;
-  }, [products]);
+  const inputRef = useRef();
 
   return (
-    <div style={{ padding: "10px 32px" }}>
+    <div style={{ padding: "20px" }}>
+      <h1>TODO</h1>
       <input
+        ref={inputRef}
         type="text"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        placeholder="Enter job..."
+        value={job}
+        onChange={(e) => dispatch(setJob(e.target.value))}
       />
-      <br />
-      <input
-        type="number"
-        placeholder="Price"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-      />
-      <button onClick={handleSubmit}>Add</button>
-      <h2>Total price: {totalPrice}</h2>
+      <button onClick={handleAddJob}>Add</button>
       <ul>
-        {products.map((product, index) => (
+        {jobs.map((job, index) => (
           <li key={index}>
-            {product.name} - {product.price}
+            {job}
+            <span onClick={() => dispatch(deleteJob(index))}>&times;</span>
           </li>
         ))}
       </ul>
