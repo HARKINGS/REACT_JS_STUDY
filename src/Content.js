@@ -1,7 +1,11 @@
 import Paragraph from "./Paragraph";
 
 function Content() {
-  return <Paragraph />;
+  return (
+    <div>
+      <Paragraph />
+    </div>
+  );
 }
 
 export default Content;
