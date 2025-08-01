@@ -1,28 +1,19 @@
-import { useRef } from "react";
-import Video from "./videos/Video";
-import "./App.css";
-
-// useImperativeHandle có tác dụng tuỳ chỉnh Ref của 1 function component
+import GlobalStyles from "./components/GlobalStyles";
+import Button from "./components/Button";
 
 function App() {
-  const videoRef = useRef();
-  console.log(videoRef.current);
-
-  const handlePlay = () => {
-    videoRef.current.play();
-  };
-
-  const handlePause = () => {
-    videoRef.current.pause();
-  };
-
   return (
-    <div>
-      <Video ref={videoRef} />
-      <button onClick={handlePlay}>Play</button>
-      <button onClick={handlePause}>Pause</button>
-    </div>
+    <GlobalStyles>
+      <div style={{ padding: "10px 32px" }}>
+        <Button />
+      </div>
+    </GlobalStyles>
   );
 }
 
 export default App;
+
+// Học CSS Module
+// Việc dùng CSS Module giúp cho việc code sẽ rõ ràng, CSS của từng component sẽ ko trùng tên nhau, đồng thời nếu không sử dụng CSS, thì sẽ tự gỡ phần CSS khỏi app, tránh thừa tài nguyên
+
+// Styled component
